@@ -11,13 +11,11 @@ import frc.robot.Constants.ShooterConstants;
 
         private final TalonFX shooterTalon = new TalonFX(ShooterConstants.kShooterMotorPort);
 
-
         private final DutyCycleOut m_output = new DutyCycleOut(0);
 
         public ShooterSubsystem() {
 
         }
-
 
         public void spin() {
             shooterTalon.setControl(m_output.withOutput(ShooterConstants.kShooterSpeed));

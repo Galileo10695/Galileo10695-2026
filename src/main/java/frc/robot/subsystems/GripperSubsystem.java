@@ -11,11 +11,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class GripperSubsystem extends SubsystemBase {
 
     // הגדרת המנוע
-    private final SparkMax sparkGripper
-;
+    private final SparkMax sparkGripper;
+
+
 
     // קבועים (מומלץ להעביר ל-Constants.java בהמשך)
-    private static final int MOTOR_ID = 5; // וודא שזה ה-ID הנכון
+    private static final int MOTOR_ID = 14; // וודא שזה ה-ID הנכון
     private static final int CURRENT_LIMIT = 30; // הגבלת זרם באמפר
     private static final double GRIP_SPEED = 0.5; // מהירות תפיסה
     private static final double EJECT_SPEED = -0.5; // מהירות שחרור
@@ -41,8 +42,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     // פעולה לעצירת המנוע
     public void stop() {
-        sparkGripper
-.set(0);
+        sparkGripper.set(0);
     }
 
     // Helper Methods לפקודות (Inline Commands)

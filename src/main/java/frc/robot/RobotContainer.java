@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,9 +46,12 @@ public class RobotContainer
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
           "swerve"));
-    private final  GripperSubsystem gripper = new GripperSubsystem();
+
+    private final GripperSubsystem m_gripper = new GripperSubsystem();
 
     private final ShooterSubsystem m_shooter = new ShooterSubsystem();
+
+    private  final PowerDistribution m_pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -109,6 +113,10 @@ public class RobotContainer
    */
   public RobotContainer()
   {
+
+      m_pdh.setSwitchableChannel(true);
+
+
     // Applies deadbands and inverts controls because joysticks
     // are back-right positive while robot
     // controls are front-left positive
@@ -121,7 +129,6 @@ public class RobotContainer
             () -> driverController.getRightY());
 
     drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
-
 
 
 
@@ -206,7 +213,7 @@ public class RobotContainer
       }
 
       {
-          operatorController.R1().whileTrue(
+          operatorController.R2().whileTrue(
                   new StartEndCommand(
                           () -> m_shooter.spin(),
                           () -> m_shooter.stop(),
@@ -215,7 +222,7 @@ public class RobotContainer
           );
 
           // לחיצה על L1: חילוץ כדור
-          operatorController.L1().whileTrue(
+          operatorController.L2().whileTrue(
                   new StartEndCommand(
                           () -> m_shooter.reverse(),
                           () -> m_shooter.stop(),
@@ -225,19 +232,18 @@ public class RobotContainer
 
       }
       {
-
-          GripperSubsystem gripperSubsystem = new GripperSubsystem();
-          operatorController.R2()
-                  .whileTrue(gripperSubsystem.runEnd(
-                          () -> gripperSubsystem.grip(),  // מה קורה כשלוחצים (מפעיל מנוע)
-                          () -> gripperSubsystem.stop()   // מה קורה כשעוזבים (עוצר מנוע)
+// R1 to Grip (In)
+          operatorController.R1()
+                  .whileTrue(m_gripper.runEnd(
+                          () -> m_gripper.grip(),
+                          () -> m_gripper.stop()
                   ));
 
-          // L2 לשחרור (מוציא החוצה)
-          operatorController.L2()
-                  .whileTrue(gripperSubsystem.runEnd(
-                          () -> gripperSubsystem.eject(),
-                          () -> gripperSubsystem.stop()
+          // L1 to Eject (Out)
+          operatorController.L1()
+                  .whileTrue(m_gripper.runEnd(
+                          () -> m_gripper.eject(),
+                          () -> m_gripper.stop()
                   ));
       }
   }
@@ -260,7 +266,4 @@ public class RobotContainer
     drivebase.setMotorBrake(brake);
   }
 
-    public GripperSubsystem getGripper() {
-        return gripper;
-    }
 }
