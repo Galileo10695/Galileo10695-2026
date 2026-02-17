@@ -19,13 +19,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.GripperSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import java.util.function.BooleanSupplier;
+
 import swervelib.SwerveInputStream;
 
 /**
@@ -44,8 +45,9 @@ public class RobotContainer
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
           "swerve"));
+    private final  GripperSubsystem gripper = new GripperSubsystem();
 
-    private final frc.robot.subsystems.ShooterSubsystem m_shooter = new frc.robot.subsystems.ShooterSubsystem();
+    private final ShooterSubsystem m_shooter = new ShooterSubsystem();
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -146,10 +148,10 @@ public class RobotContainer
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary predicate, or via the
-   * named factories in {@link edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
-   * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
+   * {@link Trigger#Trigger(BooleanSupplier)} constructor with an arbitrary predicate, or via the
+   * named factories in {@link CommandGenericHID}'s subclasses for
+   * {@link CommandXboxController Xbox}/{@link CommandPS4Controller PS4}
+   * controllers or {@link CommandJoystick Flight joysticks}.
    */
   private void configureBindings() {
       Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
@@ -222,6 +224,22 @@ public class RobotContainer
           );
 
       }
+      {
+
+          GripperSubsystem gripperSubsystem = new GripperSubsystem();
+          operatorController.R2()
+                  .whileTrue(gripperSubsystem.runEnd(
+                          () -> gripperSubsystem.grip(),  // מה קורה כשלוחצים (מפעיל מנוע)
+                          () -> gripperSubsystem.stop()   // מה קורה כשעוזבים (עוצר מנוע)
+                  ));
+
+          // L2 לשחרור (מוציא החוצה)
+          operatorController.L2()
+                  .whileTrue(gripperSubsystem.runEnd(
+                          () -> gripperSubsystem.eject(),
+                          () -> gripperSubsystem.stop()
+                  ));
+      }
   }
 
 
@@ -241,4 +259,8 @@ public class RobotContainer
   {
     drivebase.setMotorBrake(brake);
   }
+
+    public GripperSubsystem getGripper() {
+        return gripper;
+    }
 }
