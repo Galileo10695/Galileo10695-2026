@@ -49,4 +49,11 @@ public final class Constants
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT    = 6;
   }
+
+
+      public static final class ShooterConstants {
+
+          public static final int kShooterMotorPort = 1;
+          public static final double kShooterSpeed = 0.8;
+  }
 }
